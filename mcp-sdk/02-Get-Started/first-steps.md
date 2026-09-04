@@ -128,3 +128,28 @@ That dictionary is your server's declared **capabilities**. It's the first thing
 `MCPServer` serves all three primitives, so all three are always declared.
 
 Notice what isn't there. `completions` (argument autocomplete for resource templates and prompts) needs a handler you write, this server doesn't have one, so the capability is absent and a well-behaved client won't ask. That's the rule for everything optional: register the thing and the capability appears; [Completions](https://py.sdk.modelcontextprotocol.io/servers/completions/) prove it.
+
+> :information_source: Info
+> `Client(mcp)` is the same in-memory client every example in these docs is tested with, and it's how you'll test yours. It gets a whole page: [Testing](https://py.sdk.modelcontextprotocol.io/get-started/testing/).
+
+## What you did not write
+
+Look back over this page. You wrote three small Python functions. You did **not** write:
+
+- A JSON Schema. `a: int, b: int` *is* the schema for `add`.
+- A request handler. `tools/list`, `resources/read`, `prompts/get`: all served for you.
+- A capability declaration. `MCPServer` made it for you.
+- A line of protocol. The version negotiation, the JSON-RPC framing, the capability exchange: all of it happened inside the `mcp dev` and `Client(mcp)`, and you never saw it.
+
+That ratio is the whole point of the SDK.
+
+## Recap
+
+- A **host** is the LLM app, a **client** is its MCP-speaking half, a **server** is what you build.
+- Tools are **model**-controlled, resources are **application**-controlled, prompts are **user**-controlled.
+- One decorator per primitive: `@mcp.tool()`, `@mcp.resource(uri)`, `@mcp.prompt()`. Name, description, and schema come from the function.
+- A URI with a `{param}` makes a resource **template**, listed separately from concrete resources.
+- The server's **capabilities** are declared for you, and a client only asks for what a server declares.
+- `Client(mcp)` connects to the server object in memory: your test harness from day one.
+
+Next up is [Connect to a real host](https://py.sdk.modelcontextprotocol.io/get-started/real-host/): this server inside Claude Desktop or an IDE, for real. Then [Testing](https://py.sdk.modelcontextprotocol.io/get-started/testing/): one page, one in-memory client, and you're never guessing whether it works. After that, each primitive gets its own page, starting with the one the model drives: [Tools](https://py.sdk.modelcontextprotocol.io/servers/tools/).
