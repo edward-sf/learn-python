@@ -1,21 +1,35 @@
 from mcp.server import MCPServer
+from mcp.server.mcpserver.exceptions import ToolError
 
 mcp = MCPServer("Demo")
 
+CATALOG = {
+    "Dune": "Frank Herbert",
+    "Neuromancer": "William Gibson",
+    "The Left Hand of Darkness": "Ursula K. Le Guin",
+}
+
 
 @mcp.tool()
-def add(a: int, b: int) -> int:
-    """Add two numbers."""
-    return a + b
+def search_books(query: str) -> list[str]:
+    """Search the catalog by title or author."""
+    needle = query.lower()
+    return [title for title, author in CATALOG.items() if needle in title.lower() or needle in author.lower()]
 
 
-@mcp.resource("greeting://{name}")
-def greeting(name: str) -> str:
-    """Greet someone by name."""
-    return f"Hello, {name}!"
+@mcp.tool()
+def get_author(title: str) -> str:
+    """Look up the author of a book in the catalog."""
+    if title not in CATALOG:
+        raise ToolError(f"No book title {title!r} in the catalog.")
+    return CATALOG[title]
 
 
-@mcp.prompt()
-def summarize(text: str) -> str:
-    """Summarize a piece of text in one sentence."""
-    return f"Summarize the following text in one sentence:\n\n{text}"
+@mcp.resource("catalog://titles")
+def titles() -> str:
+    """Every title in the catalog, one per line."""
+    return "\n".join(sorted(CATALOG))
+
+
+if __name__ == "__main__":
+    mcp.run()
